@@ -1,0 +1,48 @@
+Project ID: first-spark-project-283400
+
+gcloud projects create first-python-project-283400 --name first-python-project
+gcloud projects list
+
+gcloud projects delete first-python-project-283400 --quiet
+
+gcloud config list -- to find configurations that are changed from default values.
+gcloud auth list -- to find all accounts
+
+gcloud compute project-info describe --project first-spark-project-283400
+gcloud compute regions describe us-central1
+
+
+gcloud config get-value project
+gcloud config get-value dataproc/region
+
+gcloud config set project first-spark-project-283400
+gcloud config set dataproc/region us-central1
+
+set BUCKET_NAME=first-bucket-283400
+gsutil mb gs://%BUCKET_NAME%
+gsutil ls gs://%BUCKET_NAME%
+
+gcloud services enable compute.googleapis.com dataproc.googleapis.com bigquerystorage.googleapis.com
+
+rem export
+set CLUSTER_NAME=first-spark-cluster
+gcloud dataproc clusters create %CLUSTER_NAME% --worker-machine-type n1-standard-8 --num-workers 2 --image-version 1.5-debian --initialization-actions gs://dataproc-initialization-actions/python/pip-install.sh --metadata "PIP_PACKAGES=google-cloud-storage" --optional-components=ANACONDA
+
+
+Big Query: Query Editor: 
+select * from fh-bigquery.reddit_posts.2017_01 limit 10;
+
+gcloud dataproc jobs submit pyspark --cluster %CLUSTER_NAME% --jars gs://spark-lib/bigquery/spark-bigquery-latest_2.12.jar --driver-log-levels root=FATAL F:\Study\gcp\counts_by_subreddit.py
+
+gcloud dataproc jobs submit pyspark --cluster %CLUSTER_NAME% --jars gs://spark-lib/bigquery/spark-bigquery-latest_2.12.jar --driver-log-levels root=FATAL %SPARK_HOME%\examples\src\main\python\pi.py -- 10
+gcloud dataproc jobs submit pyspark --region us-central1 --cluster $CLUSTER_NAME --jars gs://spark-lib/bigquery/spark-bigquery-latest_2.12.jar --driver-log-levels root=FATAL $SPARK_HOME/examples/src/main/python/pi.py -- 10
+
+gcloud compute ssh --zone "us-central1-c" "first-spark-cluster-m" --project "first-spark-project-283400"
+
+bq load --source_format CSV data_set.table_name_to_be_created gs://file_path_to_be_loaded  name:string,gender:integer
+bq load --source_format CSV report_analysis.report_data file://F:/Study/gcp/data/count_of_matters_opened_per_month.csv report_month:integer,rec_count:integer
+bq rm data_set.table_name ==> to drop table/dataset
+bq mk report_analysis.projected_results report_month:integer,rec_count:integer
+bq query --use_legacy_sql=false "SELECT word, SUM(word_count) AS count FROM `bigquery-public-data`.samples.shakespeare WHERE word LIKE '%raisin%' GROUP BY word"
+
+bq rm --recursive report_analysis
